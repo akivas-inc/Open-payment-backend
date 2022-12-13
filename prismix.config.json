@@ -1,0 +1,13 @@
+{
+    "mixers": [
+        {
+            "input": [
+                "./prisma/models/user.prisma",
+                "./prisma/models/business.prisma",
+                "./prisma/models/transaction.prisma",
+                "./prisma/models/setting.prisma"
+            ],
+            "output": "./prisma/schema.prisma"
+        }
+    ]
+}

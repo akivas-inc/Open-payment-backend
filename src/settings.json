@@ -1,0 +1,13 @@
+{
+    "transfer_mtn_fee": 0.1,
+    "transfer_orange_fee": 0.1,
+    "withdrawal_mtn_fee": 0.1,
+    "withdrawal_orange_fee": 0.1,
+    "min_transfer_amount": 1,
+    "max_transfer_amount": 500000,
+    "min_withdrawal_amount": 1,
+    "max_withdrawal_amount":500000,
+    "small_business_limitaion": 1000000,
+    "medium_business_limitation": 2000000,
+    "large_business_limitation": 3000000
+}

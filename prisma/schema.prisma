@@ -1,0 +1,190 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// users table
+model User {
+  id Int @id @default(autoincrement())
+  email String @unique
+  username String @unique
+  phone String? 
+  name String 
+  address String?
+  about String?
+  profile_picture String?
+  password String
+  language LANGUAGE @default(en)
+  is_active Boolean @default(false)
+  is_staff Boolean @default(false)
+  is_admin Boolean @default(false)
+  email_verified_at DateTime?
+  last_online DateTime?
+  enable_email_notification Boolean @default(true)
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+  users Business[]
+  team Team? @relation(name: "team")
+  members Team[] @relation(name: "member")
+  data Json?
+
+  @@map("users")
+}
+
+// user can have a team and add member with a specific role
+model Team {
+  id Int @id @default(autoincrement())
+  team_id Int @unique
+  member_id Int
+  role ROLE @default(admin)
+  team User @relation(name: "team", fields: [team_id], references: [id])
+  member User @relation(name: "member", fields: [member_id], references: [id])
+}
+
+// different catgeory of business
+model BusinessCategory {
+  id Int @id @default(autoincrement())
+  name String
+  businesses Business[]
+  @@map("business_categories")
+}
+
+// business 
+model Business {
+  id Int @id @default(autoincrement())
+  code String @db.VarChar(5)
+  name String
+  legal_name String
+  about String @db.Text
+  logo String?
+  website String? 
+  status STATUS @default(pending)
+  business_type BusinessType @default(small)
+  is_user_commission_fee Boolean @default(false)
+  documents Json?
+  user_id Int
+  business_category_id Int
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  wallet wallet?
+  apiKey BusinessApiKey?
+  user User @relation(fields: [user_id], references: [id])
+  businessCategory BusinessCategory @relation(fields: [business_category_id], references: [id])
+  transactions Transaction[]
+  @@map("businesses")
+}
+
+// Wallet
+model wallet {
+  id Int @id @default(autoincrement())
+  wallet_id String
+  balance Float @default(0.0)
+  business_id Int @unique
+
+  business Business @relation(fields: [business_id], references: [id])
+}
+
+// payment methods
+model PaymentMethod {
+  id Int @id @default(autoincrement())
+  name String
+  code String
+  client_id String?
+  client_secret String?
+  access_token String?
+  expires_at DateTime?
+  can_cash_out Boolean @default(false)
+  is_active Boolean @default(true)
+  createdAt DateTime @default(now())
+
+  transactions Transaction[]
+  @@map("payment_methods")
+}
+
+model Transaction {
+  id Int @id @default(autoincrement())
+  transaction_id String
+  external_id String
+  fee Float @default(0.0)
+  amount Float
+  type TRANSACTION_TYPE
+  status TRANSACTION_STATUS @default(pending)
+  description String? @db.Text
+  data Json?
+  payment_method_id Int
+  business_id Int
+  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now())
+
+  business Business @relation(fields: [business_id], references: [id])
+  paymentMethod PaymentMethod @relation(fields: [payment_method_id], references: [id])
+  @@map("transactions")
+}
+
+// platform setting
+model PlatformSetting {
+  id Int @id @default(autoincrement())
+  key String
+  value String
+  section String @default("general")
+
+  @@map("platform_settings")
+}
+
+model BusinessApiKey {
+  id Int @id @default(autoincrement())
+  business_id Int @unique
+  client_id String? @db.Text
+  client_secret String? @db.Text
+  access_token String? @db.Text
+  is_active Boolean @default(true)
+  callback_url String?
+  meta  Json?
+
+  business Business @relation(fields: [business_id], references: [id])
+  @@map("business_api_key")
+}
+
+enum TRANSACTION_TYPE {
+  deposit
+  withdrawal
+}
+
+enum TRANSACTION_STATUS {
+  pending
+  complete
+  cancelled
+}
+
+enum LANGUAGE {
+  en
+  fr
+}
+
+enum STATUS {
+  pending
+  approved
+  rejected
+  suspended
+}
+
+enum BusinessType {
+  small
+  medium
+  large
+  extra_large
+}
+
+enum ROLE {
+  admin
+  technical
+  financial
+}
